@@ -1,66 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-// The video
-let video;
-// For displaying the label
-let label = "waiting...";
-// The classifier
-let classifier;
-let modelURL = 'https://teachablemachine.withgoogle.com/models/gVPLt6MUK/';
+<html>
+      <head>
+        <title>Teachable Machine Image Model</title>
+      </head>
+      <body>
 
-// STEP 1: Load the model!
-function preload() {
-  classifier = ml5.imageClassifier(modelURL + 'model.json');
-}
-
-
-function setup() {
-  createCanvas(640, 520);
-  // Create the video
-  video = createCapture(VIDEO);
-  video.hide();
-  // STEP 2: Start classifying
-  classifyVideo();
-}
-
-// STEP 2 classify the videeo!
-function classifyVideo() {
-  classifier.classify(video, gotResults);
-}
-
-function draw() {
-  background(0);
-
-  // Draw the video
-  image(video, 0, 0);
-
-  // STEP 4: Draw the label
-  textSize(32);
-  textAlign(CENTER, CENTER);
-  fill(255);
-  text(label, width / 2, height - 16);
-
-  let emoji = "🕐";
-  if (label == "Sarah") {
-    emoji = "🧍‍♀️";
-  } else if (label == "Cow") {
-    emoji = "🐄";
+<div>Teachable Machine Image Model - p5.js and ml5.js</div>
+<script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/addons/p5.dom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ml5@latest/dist/ml5.min.js"></script>
+<script type="text/javascript">
+  // Classifier Variable
+  let classifier;
+  // Model URL
+  let imageModelURL = 'https://teachablemachine.withgoogle.com/models/gVPLt6MUK/';
   
+  // Video
+  let video;
+  let flippedVideo;
+  // To store the classification
+  let label = "";
+
+  // Load the model first
+  function preload() {
+    classifier = ml5.imageClassifier(imageModelURL + 'model.json');
   }
 
-  // Draw the emoji
-  textSize(256);
-  text(emoji, width / 2, height / 2);
-}
+  function setup() {
+    createCanvas(320, 260);
+    // Create the video
+    video = createCapture(VIDEO);
+    video.size(320, 240);
+    video.hide();
 
-// STEP 3: Get the classification!
-function gotResults(error, results) {
-  // Something went wrong!
-  if (error) {
-    console.error(error);
-    return;
+    flippedVideo = ml5.flipImage(video);
+    // Start classifying
+    classifyVideo();
   }
-  // Store the label and classify again!
-  label = results[0].label;
-  classifyVideo();
-}
+
+  function draw() {
+    background(0);
+    // Draw the video
+    image(flippedVideo, 0, 0);
+
+    // Draw the label
+    fill(255);
+    textSize(16);
+    textAlign(CENTER);
+    text(label, width / 2, height - 4);
+  }
+
+  // Get a prediction for the current video frame
+  function classifyVideo() {
+    flippedVideo = ml5.flipImage(video)
+    classifier.classify(flippedVideo, gotResult);
+    flippedVideo.remove();
+
+  }
+
+  // When we get a result
+  function gotResult(error, results) {
+    // If there is an error
+    if (error) {
+      console.error(error);
+      return;
+    }
+    // The results are in an array ordered by confidence.
+    // console.log(results[0]);
+    label = results[0].label;
+    // Classifiy again!
+    classifyVideo();
+  }
+    </script>
+  </body>
+</html>
